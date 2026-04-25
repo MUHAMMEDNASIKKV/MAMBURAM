@@ -10,16 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Inter', sans-serif; }
-
-        html, body {
-            overflow-y: auto;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-
         body { background: #f8fafc; }
-
         .card-modern {
             background: white;
             border-radius: 28px;
@@ -44,18 +35,6 @@
             background-color: #f3f4f6;
             cursor: not-allowed;
         }
-        select.input-field {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1em;
-            cursor: pointer;
-        }
-        select.input-field:disabled {
-            background-color: #f3f4f6;
-            cursor: not-allowed;
-        }
         .department-card {
             border: 2px solid #e9ecef;
             border-radius: 24px;
@@ -69,6 +48,10 @@
             border-color: #0f3b2c;
             background: #f0f9f4;
             box-shadow: 0 8px 20px rgba(15,59,44,0.12);
+        }
+        .department-card.highlight {
+            border-color: #0f3b2c;
+            background: #f0f9f4;
         }
         .department-card.disabled {
             opacity: 0.5;
@@ -144,23 +127,26 @@
         }
         .department-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: 1fr;
             gap: 0.75rem;
         }
-        @media (max-width: 640px) {
-            .department-grid {
-                grid-template-columns: 1fr;
-            }
+        .note-text {
+            font-size: 0.85rem;
+            color: #6b7280;
+            padding: 0.5rem 1rem;
+            background: #f0fdf4;
+            border-radius: 12px;
+            border: 1px solid #bbf7d0;
         }
     </style>
 </head>
 <body class="min-h-screen p-4 md:p-6">
 
     <!-- MAIN PORTAL CARD -->
-    <div class="max-w-4xl w-full mx-auto card-modern p-5 md:p-8 transition-all">
+    <div class="max-w-xl w-full mx-auto card-modern p-5 md:p-8 transition-all">
         <div class="text-center mb-6">
             <h1 class="text-2xl md:text-3xl font-extrabold text-gray-800">MAMBURAM QUOTA</h1>
-            <p class="text-gray-500 mt-2">Select Your Department</p>
+            <p class="text-gray-500 mt-2">PG Department Registration</p>
             <div class="h-1 w-20 bg-emerald-700 mx-auto rounded-full mt-3"></div>
         </div>
 
@@ -168,28 +154,47 @@
         <div class="space-y-5">
             <!-- Enrol No -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fas fa-id-card mr-2 text-emerald-700"></i>Enrolment Number</label>
-                <input type="text" id="enrolNo" class="input-field" placeholder="Enter your enrolment number" autocomplete="off">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    <i class="fas fa-id-card mr-2 text-emerald-700"></i>Enrolment Number
+                </label>
+                <input type="text" id="enrolNo" class="input-field" placeholder="Enter your enrolment number (e.g., 16074)" autocomplete="off">
                 <p id="enrolError" class="text-xs text-red-500 mt-1 hidden"></p>
             </div>
 
-            <!-- Name (auto from CSV) -->
+            <!-- Name (auto from data) -->
             <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fas fa-user mr-2 text-emerald-700"></i>Full Name</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    <i class="fas fa-user mr-2 text-emerald-700"></i>Full Name
+                </label>
                 <input type="text" id="studentName" class="input-field" readonly placeholder="Will appear automatically">
             </div>
 
-            <!-- Status (auto - shows if already registered) -->
+            <!-- Department (auto from data) -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    <i class="fas fa-building mr-2 text-emerald-700"></i>Your Department
+                </label>
+                <input type="text" id="studentDepartment" class="input-field" readonly placeholder="Will appear automatically">
+            </div>
+
+            <!-- Status -->
             <div id="statusContainer" class="hidden">
-                <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="fas fa-info-circle mr-2 text-emerald-700"></i>Registration Status</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">
+                    <i class="fas fa-info-circle mr-2 text-emerald-700"></i>Registration Status
+                </label>
                 <div id="statusDisplay" class="input-field"></div>
             </div>
 
-            <!-- Department Selection -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-building mr-2 text-emerald-700"></i>Select Department</label>
+            <!-- Department Selection (only for user's department) -->
+            <div id="selectionContainer" class="hidden">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-check-circle mr-2 text-emerald-700"></i>Confirm Your Department Registration
+                </label>
+                <div class="note-text mb-3">
+                    <i class="fas fa-info-circle mr-1"></i> Only 6 slots available per department. First come, first served.
+                </div>
                 <div id="departmentContainer" class="department-grid mt-2">
-                    <!-- Dynamic department cards injected -->
+                    <!-- Single department card injected -->
                 </div>
                 <div id="departmentSlotInfo" class="text-xs text-gray-500 mt-2"></div>
             </div>
@@ -207,7 +212,7 @@
     </div>
 
     <!-- global alert popup -->
-    <div id="alertPopup" class="alert-popup">⚠️ Message</div>
+    <div id="alertPopup" class="alert-popup">Message</div>
 
     <script src="app.js"></script>
 </body>
