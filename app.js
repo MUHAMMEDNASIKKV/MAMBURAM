@@ -364,20 +364,7 @@ function renderDepartmentCards() {
     });
 
     departmentContainer.innerHTML = cardsHtml;
-
-    // Show summary
-    let summaryHtml = '<div class="flex flex-wrap gap-2 mt-3">';
-    DEPARTMENTS.forEach(dept => {
-        const remaining = getRemainingSlots(dept);
-        const isFull = remaining === 0;
-        summaryHtml += `
-            <span class="text-xs ${isFull ? 'text-red-500' : 'text-gray-600'} bg-gray-100 px-2 py-1 rounded-full">
-                ${dept.substring(0, 20)}${dept.length > 20 ? '...' : ''}: ${remaining}/${SLOTS_PER_DEPARTMENT}
-            </span>
-        `;
-    });
-    summaryHtml += '</div>';
-    departmentSlotInfo.innerHTML = summaryHtml;
+    departmentSlotInfo.innerHTML = '';
 }
 
 // Global function for department selection
